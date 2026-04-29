@@ -1,3 +1,10 @@
+### Test
+
+```bash
+cd geoinsight_api
+make test
+```
+
 ### Docker build and check
 
 ```bash
