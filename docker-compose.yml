@@ -1,0 +1,28 @@
+# This is a dev compose setup, not production.
+# The volume mount lets local source changes reflect
+# inside the container, and --reload restarts the app on code changes.
+
+services:
+  api:
+    build:
+      context: .
+      dockerfile: Dockerfile
+    container_name: geoinsight-api
+    ports:
+      - "8000:8000"
+    volumes:
+      - ./src:/app/src
+    command:
+      [
+        "uv",
+        "run",
+        "uvicorn",
+        "geoinsight_api.main:app",
+        "--host",
+        "0.0.0.0",
+        "--port",
+        "8000",
+        "--reload",
+        "--app-dir",
+        "src",
+      ]
