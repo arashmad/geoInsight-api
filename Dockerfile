@@ -5,11 +5,10 @@ WORKDIR /app
 # Install uv
 COPY --from=ghcr.io/astral-sh/uv:latest /uv /uvx /bin/
 
-COPY pyproject.toml uv.lock README.md ./
+COPY pyproject.toml uv.lock ./
+COPY src ./src
 
 RUN uv sync --frozen --no-dev
-
-COPY src ./src
 
 EXPOSE 8000
 
