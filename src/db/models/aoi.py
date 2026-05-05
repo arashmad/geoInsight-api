@@ -2,7 +2,7 @@ import uuid
 from decimal import Decimal
 
 from geoalchemy2 import Geometry
-from sqlalchemy import DateTime, ForeignKey, Numeric, String, func
+from sqlalchemy import Index, DateTime, ForeignKey, Numeric, String, func
 from sqlalchemy.dialects.postgresql import JSONB, UUID
 from sqlalchemy.orm import Mapped, mapped_column, relationship
 
@@ -11,6 +11,15 @@ from src.db.base import Base
 
 class AOI(Base):
     __tablename__ = "aois"
+
+    # ! important => this is intentional to fix missing spatial index in migration file
+    __table_args__ = (
+        Index(
+            "ix_aois_geometry",
+            "geometry",
+            postgresql_using="gist",
+        ),
+    )
 
     id: Mapped[uuid.UUID] = mapped_column(
         UUID(as_uuid=True),
