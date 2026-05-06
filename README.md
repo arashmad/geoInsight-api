@@ -42,3 +42,23 @@ make test
 ```
 
 The database tests require the PostGIS container to be running.
+
+5. Database Migration
+
+```bash
+# create migration
+alembic revision --autogenerate -m "create projects and aois"
+```
+
+After creating the migration file, open it and:
+
+1. check missing packages. you may need to import `geoalchemy2`.
+2. at the top of the function `upgrade()`, add `op.execute("CREATE EXTENSION IF NOT EXISTS postgis")`
+
+```bash
+# upgrade the database
+alembic upgrade head
+
+# downgrade the database
+
+```
