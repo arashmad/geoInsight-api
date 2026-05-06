@@ -4,7 +4,7 @@ from sqlalchemy.orm import Session, sessionmaker
 
 from collections.abc import Generator
 
-from core.config import settings
+from geoinsight_api.core.config import settings
 
 engine: Engine = create_engine(
     settings.database_url,
