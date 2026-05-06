@@ -1,6 +1,6 @@
 from sqlalchemy import text
 
-from db.session import SessionLocal
+from geoinsight_api.db.session import SessionLocal
 
 
 def test_db_session_opens() -> None:

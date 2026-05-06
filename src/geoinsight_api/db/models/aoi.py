@@ -6,7 +6,7 @@ from sqlalchemy import Index, DateTime, ForeignKey, Numeric, String, func
 from sqlalchemy.dialects.postgresql import JSONB, UUID
 from sqlalchemy.orm import Mapped, mapped_column, relationship
 
-from src.db.base import Base
+from geoinsight_api.db.base import Base
 
 
 class AOI(Base):
