@@ -1,7 +1,6 @@
 from uuid import UUID
 
-MISSING_PROJECT_ID = "00000000-0000-0000-0000-000000000000"
-
+from tests.data.data_aoi import MISSING_PROJECT_ID
 
 def test_create_project(client):
     response = client.post(
