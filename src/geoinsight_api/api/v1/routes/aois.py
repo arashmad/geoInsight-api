@@ -3,7 +3,7 @@ from uuid import UUID
 from fastapi import APIRouter, Depends, HTTPException, status
 from sqlalchemy.orm import Session
 
-from geoinsight_api.api.deps import get_db
+from geoinsight_api.db.session import get_db
 from geoinsight_api.api.v1.schemas.aoi import AOICreate, AOIRead
 from geoinsight_api.services.aoi_service import AOIService, ProjectNotFoundError
 from geoinsight_api.services.geometry_service import (
