@@ -1,3 +1,5 @@
+MISSING_PROJECT_ID = "00000000-0000-0000-0000-000000000000"
+
 VALID_POLYGON = {
     "type": "Polygon",
     "coordinates": [
@@ -10,7 +12,6 @@ VALID_POLYGON = {
         ]
     ],
 }
-
 
 VALID_MULTIPOLYGON = {
     "type": "MultiPolygon",
@@ -27,7 +28,6 @@ VALID_MULTIPOLYGON = {
     ],
 }
 
-
 INVALID_POLYGON = {
     "type": "Polygon",
     "coordinates": [
@@ -41,4 +41,15 @@ INVALID_POLYGON = {
     ],
 }
 
-MISSING_PROJECT_ID = "00000000-0000-0000-0000-000000000000"
+UPDATED_POLYGON = {
+    "type": "Polygon",
+    "coordinates": [
+        [
+            [44.50, 40.10],
+            [44.52, 40.10],
+            [44.52, 40.12],
+            [44.50, 40.12],
+            [44.50, 40.10],
+        ]
+    ],
+}
