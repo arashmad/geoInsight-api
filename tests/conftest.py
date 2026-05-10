@@ -5,8 +5,7 @@ from fastapi.testclient import TestClient
 from sqlalchemy import text
 from sqlalchemy.orm import Session
 
-from geoinsight_api.db.session import get_db
-from geoinsight_api.db.session import SessionLocal
+from geoinsight_api.db.session import SessionLocal, get_db
 from geoinsight_api.main import app
 
 

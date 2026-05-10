@@ -2,6 +2,7 @@ from uuid import UUID
 
 from tests.data.data_aoi import MISSING_PROJECT_ID
 
+
 def test_create_project(client):
     response = client.post(
         "/v1/projects",

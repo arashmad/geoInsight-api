@@ -1,10 +1,11 @@
 from tests.data.data_aoi import (
-    MISSING_PROJECT_ID,
-    VALID_POLYGON,
-    VALID_MULTIPOLYGON,
     INVALID_POLYGON,
-    UPDATED_POLYGON
+    MISSING_PROJECT_ID,
+    UPDATED_POLYGON,
+    VALID_MULTIPOLYGON,
+    VALID_POLYGON,
 )
+
 
 def create_project(client) -> str:
     response = client.post(
@@ -14,6 +15,7 @@ def create_project(client) -> str:
 
     assert response.status_code == 201
     return response.json()["id"]
+
 
 def create_aoi(client, project_id: str, name: str = "Test AOI") -> dict:
     response = client.post(
@@ -26,6 +28,7 @@ def create_aoi(client, project_id: str, name: str = "Test AOI") -> dict:
 
     assert response.status_code == 201
     return response.json()
+
 
 def test_create_aoi_with_valid_polygon(client):
     project_id = create_project(client)
@@ -49,6 +52,7 @@ def test_create_aoi_with_valid_polygon(client):
     assert data["centroid"]["type"] == "Point"
     assert len(data["bbox"]) == 4
 
+
 def test_create_aoi_with_valid_multipolygon(client):
     project_id = create_project(client)
 
@@ -69,6 +73,7 @@ def test_create_aoi_with_valid_multipolygon(client):
     assert data["centroid"]["type"] == "Point"
     assert len(data["bbox"]) == 4
 
+
 def test_create_aoi_with_invalid_geometry_returns_422(client):
     project_id = create_project(client)
 
@@ -82,6 +87,7 @@ def test_create_aoi_with_invalid_geometry_returns_422(client):
 
     assert response.status_code == 422
     assert "Invalid geometry" in response.json()["detail"]
+
 
 def test_create_aoi_with_unsupported_geometry_returns_422(client):
     project_id = create_project(client)
@@ -98,7 +104,11 @@ def test_create_aoi_with_unsupported_geometry_returns_422(client):
     )
 
     assert response.status_code == 422
-    assert response.json()["detail"] == "Only Polygon and MultiPolygon geometries are supported"
+    assert (
+        response.json()["detail"]
+        == "Only Polygon and MultiPolygon geometries are supported"
+    )
+
 
 def test_create_aoi_for_missing_project_returns_404(client):
     response = client.post(
@@ -112,7 +122,9 @@ def test_create_aoi_for_missing_project_returns_404(client):
     assert response.status_code == 404
     assert response.json()["detail"] == "Project not found"
 
+
 # TODO: Add persistence test -> AOI in DB
+
 
 def test_list_aois_by_project(client):
     project_id = create_project(client)
@@ -130,11 +142,13 @@ def test_list_aois_by_project(client):
     assert "AOI A" in names
     assert "AOI B" in names
 
+
 def test_list_aois_for_missing_project_returns_404(client):
     response = client.get(f"/v1/projects/{MISSING_PROJECT_ID}/aois")
 
     assert response.status_code == 404
     assert response.json()["detail"] == "Project not found"
+
 
 def test_get_aoi(client):
     project_id = create_project(client)
@@ -149,11 +163,13 @@ def test_get_aoi(client):
     assert data["name"] == "Detail AOI"
     assert data["project_id"] == project_id
 
+
 def test_get_missing_aoi_returns_404(client):
     response = client.get(f"/v1/aois/{MISSING_PROJECT_ID}")
 
     assert response.status_code == 404
     assert response.json()["detail"] == "AOI not found"
+
 
 def test_update_aoi_name(client):
     project_id = create_project(client)
@@ -170,6 +186,7 @@ def test_update_aoi_name(client):
     assert data["id"] == created_aoi["id"]
     assert data["name"] == "Updated AOI Name"
     assert data["geometry"] == created_aoi["geometry"]
+
 
 def test_update_aoi_geometry_recalculates_derived_fields(client):
     project_id = create_project(client)
@@ -190,6 +207,7 @@ def test_update_aoi_geometry_recalculates_derived_fields(client):
     assert data["centroid"] != created_aoi["centroid"]
     assert data["bbox"] != created_aoi["bbox"]
 
+
 def test_update_missing_aoi_returns_404(client):
     response = client.patch(
         f"/v1/aois/{MISSING_PROJECT_ID}",
@@ -198,6 +216,7 @@ def test_update_missing_aoi_returns_404(client):
 
     assert response.status_code == 404
     assert response.json()["detail"] == "AOI not found"
+
 
 def test_update_aoi_with_invalid_geometry_returns_422(client):
     project_id = create_project(client)
@@ -211,6 +230,7 @@ def test_update_aoi_with_invalid_geometry_returns_422(client):
     assert response.status_code == 422
     assert "Invalid geometry" in response.json()["detail"]
 
+
 def test_delete_aoi(client):
     project_id = create_project(client)
     created_aoi = create_aoi(client, project_id, "Delete AOI")
@@ -221,6 +241,7 @@ def test_delete_aoi(client):
 
     get_response = client.get(f"/v1/aois/{created_aoi['id']}")
     assert get_response.status_code == 404
+
 
 def test_delete_missing_aoi_returns_404(client):
     response = client.delete(f"/v1/aois/{MISSING_PROJECT_ID}")
