@@ -3,8 +3,8 @@ from uuid import UUID
 
 from geoalchemy2.shape import from_shape
 from shapely.geometry import MultiPolygon, Point
-from sqlalchemy.orm import Session
 from sqlalchemy import select
+from sqlalchemy.orm import Session
 
 from geoinsight_api.db.models.aoi import AOI
 
@@ -47,7 +47,7 @@ class AOIRepository:
 
     def get_by_id(self, aoi_id: UUID) -> AOI | None:
         return self.session.get(AOI, aoi_id)
-    
+
     def update(self, aoi: AOI, data: dict[str, Any]) -> AOI:
         for field, value in data.items():
             setattr(aoi, field, value)
@@ -63,7 +63,8 @@ class AOIRepository:
         geometry: MultiPolygon,
         area_m2: float,
         centroid: Point,
-        bbox: list[float]) -> AOI:
+        bbox: list[float],
+    ) -> AOI:
         aoi.geometry = from_shape(geometry, srid=4326)
         aoi.area_m2 = area_m2
         aoi.centroid = from_shape(centroid, srid=4326)

@@ -3,8 +3,8 @@ from typing import Any
 from pyproj import Geod
 from shapely.geometry import MultiPolygon, Polygon, mapping, shape
 from shapely.geometry.base import BaseGeometry
-from shapely.validation import explain_validity
 from shapely.ops import orient
+from shapely.validation import explain_validity
 
 
 class InvalidGeometryError(Exception):

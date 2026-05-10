@@ -1,7 +1,8 @@
+from functools import cached_property
+
 from pydantic import Field
 from pydantic_settings import BaseSettings, SettingsConfigDict
 
-from functools import cached_property
 
 class Settings(BaseSettings):
     database_host: str = Field(alias="DATABASE_HOST")
@@ -12,17 +13,18 @@ class Settings(BaseSettings):
     database_echo: bool = Field(alias="DATABASE_ECHO")
 
     model_config = SettingsConfigDict(
-        env_file=".env",
-        env_file_encoding="utf-8",
-        extra="ignore")
-    
+        env_file=".env", env_file_encoding="utf-8", extra="ignore"
+    )
+
     @cached_property
     def database_url(self) -> str:
-        return(
+        return (
             f"postgresql+psycopg://{self.database_user}:"
             f"{self.database_password}@"
             f"{self.database_host}:"
             f"{self.database_port}/"
-            f"{self.database_name}")
+            f"{self.database_name}"
+        )
+
 
 settings = Settings()

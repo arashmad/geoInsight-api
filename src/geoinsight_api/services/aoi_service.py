@@ -19,6 +19,7 @@ from geoinsight_api.services.geometry_service import (
 class AOINotFoundError(Exception):
     pass
 
+
 class ProjectNotFoundError(Exception):
     pass
 
@@ -60,7 +61,6 @@ class AOIService:
         self.session.refresh(aoi)
 
         return aoi
-
 
     def to_response(self, aoi: AOI) -> dict[str, Any]:
         geometry = to_shape(aoi.geometry)

@@ -2,12 +2,13 @@ from fastapi import Depends, FastAPI
 from sqlalchemy import text
 from sqlalchemy.orm import Session
 
-from geoinsight_api.db.session import get_db
 from geoinsight_api.api.v1.router import api_router
+from geoinsight_api.db.session import get_db
 
 app = FastAPI(title="GeoInsight API")
 
 app.include_router(api_router)
+
 
 @app.get("/health")
 async def health() -> dict[str, str]:

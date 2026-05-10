@@ -3,12 +3,13 @@ from uuid import UUID
 from fastapi import APIRouter, Depends, HTTPException, status
 from sqlalchemy.orm import Session
 
-from geoinsight_api.db.session import get_db
 from geoinsight_api.api.v1.schemas.aoi import AOICreate, AOIRead, AOIUpdate
+from geoinsight_api.db.session import get_db
 from geoinsight_api.services.aoi_service import (
     AOINotFoundError,
     AOIService,
-    ProjectNotFoundError)
+    ProjectNotFoundError,
+)
 from geoinsight_api.services.geometry_service import (
     InvalidGeometryError,
     UnsupportedGeometryTypeError,
@@ -57,6 +58,7 @@ def create_aoi(
             status_code=status.HTTP_422_UNPROCESSABLE_CONTENT,
             detail=f"Invalid geometry: {exc.reason}",
         ) from None
+
 
 @router.get(
     "/projects/{project_id}/aois",
