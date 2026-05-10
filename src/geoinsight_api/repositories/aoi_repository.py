@@ -26,7 +26,7 @@ class AOIRepository:
             project_id=project_id,
             name=name,
             geometry=from_shape(geometry, srid=4326),
-            area_m2=Decimal(str(area_m2)),
+            area_m2=area_m2,
             centroid=from_shape(centroid, srid=4326),
             bbox=bbox,
         )

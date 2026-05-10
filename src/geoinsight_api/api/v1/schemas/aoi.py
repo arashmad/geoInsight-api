@@ -1,5 +1,4 @@
 from datetime import datetime
-from decimal import Decimal
 from typing import Any
 from uuid import UUID
 
@@ -16,7 +15,7 @@ class AOIRead(BaseModel):
     project_id: UUID
     name: str
     geometry: dict[str, Any]
-    area_m2: Decimal
+    area_m2: float
     centroid: dict[str, Any]
     bbox: list[float]
     created_at: datetime
