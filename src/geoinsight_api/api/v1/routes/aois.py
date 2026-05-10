@@ -86,6 +86,7 @@ def get_aoi(
     service: AOIService = Depends(get_aoi_service),
 ) -> dict:
     try:
+        # TODO: Guard AOI serialization against nullable spatial fields
         aoi = service.get_aoi(aoi_id)
         return service.to_response(aoi)
 
