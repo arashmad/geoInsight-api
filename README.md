@@ -2,36 +2,124 @@
 
 FastAPI backend for geospatial analysis workflows.
 
-## Local development with PostGIS
+## Current scope
 
-This project uses PostgreSQL with PostGIS for local development.
+This service currently supports:
 
-1. Create local environment file:
+- Health checks (`/health`, `/health/db`)
+- Project CRUD basics (create and list projects)
+- AOI creation under a project
+
+The API is intentionally minimal while the core geospatial workflow is being validated.
+
+## Next milestone
+
+The next milestone is focused on AOI-centric analysis workflows, including:
+
+- AOI retrieval/listing ergonomics
+- Geospatial processing jobs tied to AOIs
+- Better project/AOI lifecycle and status tracking
+
+## Local setup
+
+1. Copy the local environment file:
 
 ```bash
 cp .env.example .env
 ```
 
-2. Start services:
+2. Install dependencies (using `uv`):
+
+```bash
+uv sync --dev
+```
+
+## Run with Docker Compose
+
+Start the app and PostGIS:
 
 ```bash
 docker compose up --build
 ```
 
-3. API health check:
-
-```bash
-curl http://127.0.0.1:8000/health
-curl http://127.0.0.1:8000/health/db
-```
-
-4. Stop services:
+Stop services:
 
 ```bash
 docker compose down
 ```
 
-Database connection is configured via `.env` (see `.env.example`).
+## Database migrations (Alembic)
+
+Apply the latest migrations:
+
+```bash
+alembic upgrade head
+```
+
+Create a new migration when needed:
+
+```bash
+alembic revision --autogenerate -m "describe change"
+```
+
+## API demo with curl
+
+Assuming the app is running on `http://127.0.0.1:8000`.
+
+### 1) Health checks
+
+```bash
+curl -s http://127.0.0.1:8000/health
+curl -s http://127.0.0.1:8000/health/db
+```
+
+### 2) Create a project
+
+```bash
+curl -s -X POST http://127.0.0.1:8000/api/v1/projects \
+  -H "Content-Type: application/json" \
+  -d '{
+    "name": "Demo project",
+    "description": "Project for local API walkthrough"
+  }'
+```
+
+### 3) List projects
+
+```bash
+curl -s http://127.0.0.1:8000/api/v1/projects
+```
+
+### 4) Create an AOI under a project
+
+Replace `<project_id>` with an ID returned by the create/list project calls.
+
+```bash
+curl -s -X POST http://127.0.0.1:8000/api/v1/projects/<project_id>/aois \
+  -H "Content-Type: application/json" \
+  -d '{
+    "name": "SF Downtown AOI",
+    "description": "Simple polygon AOI",
+    "geometry": {
+      "type": "Polygon",
+      "coordinates": [[
+        [-122.423, 37.775],
+        [-122.412, 37.775],
+        [-122.412, 37.784],
+        [-122.423, 37.784],
+        [-122.423, 37.775]
+      ]]
+    }
+  }'
+```
+
+### 5) Optionally list AOIs for a project
+
+If enabled in your local code/version:
+
+```bash
+curl -s http://127.0.0.1:8000/api/v1/projects/<project_id>/aois
+```
 
 ## Tests
 
@@ -42,23 +130,3 @@ make test
 ```
 
 The database tests require the PostGIS container to be running.
-
-5. Database Migration
-
-```bash
-# create migration
-alembic revision --autogenerate -m "create projects and aois"
-```
-
-After creating the migration file, open it and:
-
-1. check missing packages. you may need to import `geoalchemy2`.
-2. at the top of the function `upgrade()`, add `op.execute("CREATE EXTENSION IF NOT EXISTS postgis")`
-
-```bash
-# upgrade the database
-alembic upgrade head
-
-# downgrade the database
-
-```
