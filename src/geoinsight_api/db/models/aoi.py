@@ -2,7 +2,7 @@ import uuid
 from decimal import Decimal
 
 from geoalchemy2 import Geometry
-from sqlalchemy import Index, DateTime, ForeignKey, Numeric, String, func
+from sqlalchemy import Index, DateTime, ForeignKey, Float, String, func
 from sqlalchemy.dialects.postgresql import JSONB, UUID
 from sqlalchemy.orm import Mapped, mapped_column, relationship
 
@@ -46,7 +46,7 @@ class AOI(Base):
     )
 
     area_m2: Mapped[Decimal | None] = mapped_column(
-        Numeric,
+        Float,
         nullable=True,
     )
 
