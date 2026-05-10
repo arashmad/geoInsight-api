@@ -4,6 +4,7 @@ from pyproj import Geod
 from shapely.geometry import MultiPolygon, Polygon, mapping, shape
 from shapely.geometry.base import BaseGeometry
 from shapely.validation import explain_validity
+from shapely.ops import orient
 
 
 class InvalidGeometryError(Exception):
@@ -48,8 +49,20 @@ def normalize_to_multipolygon(geometry: BaseGeometry) -> MultiPolygon:
 
 
 def calculate_area_m2(geometry: BaseGeometry) -> float:
-    area, _ = WGS84_GEOD.geometry_area_perimeter(geometry)
-    return abs(area)
+    if isinstance(geometry, Polygon):
+        area, _ = WGS84_GEOD.geometry_area_perimeter(orient(geometry, sign=1.0))
+        return abs(area)
+
+    if isinstance(geometry, MultiPolygon):
+        total = 0.0
+
+        for polygon in geometry.geoms:
+            area, _ = WGS84_GEOD.geometry_area_perimeter(orient(polygon, sign=1.0))
+            total += abs(area)
+
+        return total
+
+    raise UnsupportedGeometryTypeError
 
 
 def calculate_centroid_geojson(geometry: BaseGeometry) -> dict[str, Any]:
