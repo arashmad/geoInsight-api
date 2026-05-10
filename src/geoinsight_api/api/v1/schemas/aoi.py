@@ -20,3 +20,7 @@ class AOIRead(BaseModel):
     bbox: list[float]
     created_at: datetime
     updated_at: datetime
+
+class AOIUpdate(BaseModel):
+    name: str | None = Field(default=None, min_length=1, max_length=255)
+    geometry: dict[str, Any] | None = None

@@ -1,9 +1,10 @@
 {
   "cSpell.words": [
+    "geoalchemy",
     "geoinsight",
     "geospatial",
     "pyproject",
-    "uvicorn",
-    "sqlalchemy"
+    "sqlalchemy",
+    "uvicorn"
   ]
 }
