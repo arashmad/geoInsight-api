@@ -7,7 +7,7 @@ README_PATH = Path(__file__).resolve().parents[1] / "README.md"
 def test_readme_includes_setup_and_migration_steps() -> None:
     readme = README_PATH.read_text(encoding="utf-8")
 
-    assert "## Local setup" in readme
+    assert "## Local Development" in readme
     assert "docker compose up --build" in readme
     assert "alembic upgrade head" in readme
 
@@ -24,5 +24,5 @@ def test_readme_includes_required_curl_flow() -> None:
 def test_readme_describes_scope_and_next_milestone() -> None:
     readme = README_PATH.read_text(encoding="utf-8")
 
-    assert "## Current scope" in readme
-    assert "## Next milestone" in readme
+    assert "## Current Scope" in readme
+    assert "## Next Milestone" in readme

@@ -1,8 +1,10 @@
 # GeoInsight API
 
+## Overview
+
 FastAPI backend for geospatial analysis workflows.
 
-## Current scope
+## Current Scope
 
 This service currently supports:
 
@@ -12,15 +14,16 @@ This service currently supports:
 
 The API is intentionally minimal while the core geospatial workflow is being validated.
 
-## Next milestone
+## Tech Stack
 
-The next milestone is focused on AOI-centric analysis workflows, including:
+- Python + FastAPI
+- PostgreSQL/PostGIS
+- Alembic for migrations
+- Docker Compose for local orchestration
 
-- AOI retrieval/listing ergonomics
-- Geospatial processing jobs tied to AOIs
-- Better project/AOI lifecycle and status tracking
+## Local Development
 
-## Local setup
+### Setup
 
 1. Copy the local environment file:
 
@@ -34,7 +37,7 @@ cp .env.example .env
 uv sync --dev
 ```
 
-## Run with Docker Compose
+### Run with Docker Compose
 
 Start the app and PostGIS:
 
@@ -48,7 +51,7 @@ Stop services:
 docker compose down
 ```
 
-## Database migrations (Alembic)
+## Database Migrations
 
 Apply the latest migrations:
 
@@ -62,7 +65,7 @@ Create a new migration when needed:
 alembic revision --autogenerate -m "describe change"
 ```
 
-## API demo with curl
+## Demo Flow
 
 Assuming the app is running on `http://127.0.0.1:8000`.
 
@@ -121,6 +124,15 @@ If enabled in your local code/version:
 curl -s http://127.0.0.1:8000/api/v1/projects/<project_id>/aois
 ```
 
+## API Endpoints
+
+- `GET /health`
+- `GET /health/db`
+- `POST /api/v1/projects`
+- `GET /api/v1/projects`
+- `POST /api/v1/projects/<project_id>/aois`
+- `GET /api/v1/projects/<project_id>/aois` (optional, if enabled in your local version)
+
 ## Tests
 
 Run tests locally:
@@ -130,3 +142,11 @@ make test
 ```
 
 The database tests require the PostGIS container to be running.
+
+## Next Milestone
+
+The next milestone is focused on AOI-centric analysis workflows, including:
+
+- AOI retrieval/listing ergonomics
+- Geospatial processing jobs tied to AOIs
+- Better project/AOI lifecycle and status tracking
