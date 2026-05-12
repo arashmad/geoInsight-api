@@ -4,6 +4,7 @@
     "geoinsight",
     "geospatial",
     "pyproject",
+    "pytest",
     "sqlalchemy",
     "uvicorn"
   ]
