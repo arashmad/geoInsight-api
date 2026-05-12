@@ -4,8 +4,12 @@ test:
 	uv run pytest
 
 format:
-	uv run ruff check --fix src tests
+	uv run ruff check src tests --fix
 	uv run ruff format src tests
+
+format-all:
+	uv run ruff check . --fix
+	uv run ruff format .
 
 format-check:
 	uv run ruff check src tests

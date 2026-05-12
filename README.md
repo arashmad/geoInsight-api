@@ -55,6 +55,8 @@ Connect directly to the database, running on docker:
 
 ```bash
 docker exec -it geoinsight-db psql -U "$DATABASE_USER" -d "$DATABASE_NAME"
+# \dt;
+# \d <tb-name>;
 ```
 
 ## Database Migrations
@@ -150,6 +152,17 @@ curl -s http://127.0.0.1:8000/v1/projects/<project_id>/aois
 - `GET /v1/aois/{aoi_id}`
 - `PATCH /v1/aois/{aoi_id}`
 - `DELETE /v1/aois/{aoi_id}`
+
+## Format
+
+Run format locally:
+
+```bash
+# only /src and /test directory
+make format
+# entire the project
+make format-all
+```
 
 ## Tests
 
