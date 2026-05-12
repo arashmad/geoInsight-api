@@ -51,12 +51,24 @@ Stop services:
 docker compose down
 ```
 
+Connect directly to the database, running on docker:
+
+```bash
+docker exec -it geoinsight-db psql -U "$DATABASE_USER" -d "$DATABASE_NAME"
+```
+
 ## Database Migrations
 
 Apply the latest migrations:
 
 ```bash
 alembic upgrade head
+```
+
+Check the migration ref:
+
+```bash
+uv run alembic current
 ```
 
 Create a new migration when needed:
