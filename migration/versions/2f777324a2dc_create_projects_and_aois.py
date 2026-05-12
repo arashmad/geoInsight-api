@@ -36,7 +36,7 @@ def upgrade() -> None:
     sa.Column('project_id', sa.UUID(), nullable=False),
     sa.Column('name', sa.String(length=255), nullable=False),
     sa.Column('geometry', geoalchemy2.types.Geometry(geometry_type='MULTIPOLYGON', srid=4326, dimension=2, spatial_index=False, from_text='ST_GeomFromEWKT', name='geometry', nullable=False), nullable=False),
-    sa.Column('area_m2', sa.Numeric(), nullable=True),
+    sa.Column("area_m2", sa.Float(), nullable=True),
     sa.Column('centroid', geoalchemy2.types.Geometry(geometry_type='POINT', srid=4326, dimension=2, spatial_index=False, from_text='ST_GeomFromEWKT', name='geometry'), nullable=True),
     sa.Column('bbox', postgresql.JSONB(astext_type=sa.Text()), nullable=True),
     sa.Column('created_at', sa.DateTime(timezone=True), server_default=sa.text('now()'), nullable=False),
