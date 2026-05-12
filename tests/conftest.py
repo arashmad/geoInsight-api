@@ -15,8 +15,11 @@ def db_session() -> Generator[Session, None, None]:
 
     try:
         # Cleanup before each test
+        session.execute(text("DELETE FROM vector_features"))
+        session.execute(text("DELETE FROM vector_layers"))
         session.execute(text("DELETE FROM aois"))
         session.execute(text("DELETE FROM projects"))
+
         session.commit()
 
         yield session
