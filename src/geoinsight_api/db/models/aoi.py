@@ -1,5 +1,4 @@
 import uuid
-from decimal import Decimal
 
 from geoalchemy2 import Geometry
 from sqlalchemy import DateTime, Float, ForeignKey, Index, String, func
@@ -45,7 +44,7 @@ class AOI(Base):
         nullable=False,
     )
 
-    area_m2: Mapped[Decimal | None] = mapped_column(
+    area_m2: Mapped[float | None] = mapped_column(
         Float,
         nullable=True,
     )

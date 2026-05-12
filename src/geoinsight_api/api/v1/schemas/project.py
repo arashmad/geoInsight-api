@@ -10,7 +10,7 @@ class ProjectCreate(BaseModel):
 
 
 class ProjectUpdate(BaseModel):
-    name: str = Field(min_length=1, max_length=255, default=None)
+    name: str | None = Field(default=None, min_length=1, max_length=255)
     description: str | None = None
 
 

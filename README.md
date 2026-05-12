@@ -79,7 +79,7 @@ curl -s http://127.0.0.1:8000/health/db
 ### 2) Create a project
 
 ```bash
-curl -s -X POST http://127.0.0.1:8000/api/v1/projects \
+curl -s -X POST http://127.0.0.1:8000/v1/projects \
   -H "Content-Type: application/json" \
   -d '{
     "name": "Demo project",
@@ -90,7 +90,7 @@ curl -s -X POST http://127.0.0.1:8000/api/v1/projects \
 ### 3) List projects
 
 ```bash
-curl -s http://127.0.0.1:8000/api/v1/projects
+curl -s http://127.0.0.1:8000/v1/projects
 ```
 
 ### 4) Create an AOI under a project
@@ -98,7 +98,7 @@ curl -s http://127.0.0.1:8000/api/v1/projects
 Replace `<project_id>` with an ID returned by the create/list project calls.
 
 ```bash
-curl -s -X POST http://127.0.0.1:8000/api/v1/projects/<project_id>/aois \
+curl -s -X POST http://127.0.0.1:8000/v1/projects/<project_id>/aois \
   -H "Content-Type: application/json" \
   -d '{
     "name": "SF Downtown AOI",
@@ -121,17 +121,23 @@ curl -s -X POST http://127.0.0.1:8000/api/v1/projects/<project_id>/aois \
 If enabled in your local code/version:
 
 ```bash
-curl -s http://127.0.0.1:8000/api/v1/projects/<project_id>/aois
+curl -s http://127.0.0.1:8000/v1/projects/<project_id>/aois
 ```
 
 ## API Endpoints
 
 - `GET /health`
 - `GET /health/db`
-- `POST /api/v1/projects`
-- `GET /api/v1/projects`
-- `POST /api/v1/projects/<project_id>/aois`
-- `GET /api/v1/projects/<project_id>/aois` (optional, if enabled in your local version)
+- `POST /v1/projects`
+- `GET /v1/projects`
+- `GET /v1/projects/{project_id}`
+- `PATCH /v1/projects/{project_id}`
+- `DELETE /v1/projects/{project_id}`
+- `POST /v1/projects/{project_id}/aois`
+- `GET /v1/projects/{project_id}/aois`
+- `GET /v1/aois/{aoi_id}`
+- `PATCH /v1/aois/{aoi_id}`
+- `DELETE /v1/aois/{aoi_id}`
 
 ## Tests
 
