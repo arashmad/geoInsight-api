@@ -9,8 +9,8 @@ Create Date: 2026-05-12 06:58:54.962334
 from typing import Sequence, Union
 
 import geoalchemy2
-from alembic import op
 import sqlalchemy as sa
+from alembic import op
 from sqlalchemy.dialects import postgresql
 
 # revision identifiers, used by Alembic.

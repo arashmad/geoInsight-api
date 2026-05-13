@@ -1,15 +1,12 @@
 from logging.config import fileConfig
 
 from alembic import context
-from sqlalchemy import engine_from_config
-from sqlalchemy import pool
-
-from geoinsight_api.core.config import settings
-from geoinsight_api.db.base import Base
+from sqlalchemy import engine_from_config, pool
 
 # ! important => import models so Alembic registers them in Base.metadata
 import geoinsight_api.db.models  # noqa: F401
-
+from geoinsight_api.core.config import settings
+from geoinsight_api.db.base import Base
 
 config = context.config
 
