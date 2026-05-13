@@ -152,6 +152,10 @@ curl -s http://127.0.0.1:8000/v1/projects/<project_id>/aois
 - `GET /v1/aois/{aoi_id}`
 - `PATCH /v1/aois/{aoi_id}`
 - `DELETE /v1/aois/{aoi_id}`
+- `POST /v1/vector-layers`
+- `GET /v1/vector-layers`
+- `GET /v1/vector-layers/{layer_id}`
+- `DELETE /v1/vector-layers/{layer_id}`
 
 ## Format
 
@@ -170,6 +174,12 @@ Run tests locally:
 
 ```bash
 make test
+```
+
+Run focus test:
+
+```bash
+uv run pytest tests/test<name>.py
 ```
 
 The database tests require the PostGIS container to be running.
