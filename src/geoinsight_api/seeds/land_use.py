@@ -90,7 +90,6 @@ def seed_land_use_data(session: Session) -> VectorLayer:
         )
         session.add(feature)
 
-    session.commit()
-    session.refresh(layer)
+    session.flush()
 
     return layer
