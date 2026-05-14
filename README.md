@@ -79,6 +79,14 @@ Create a new migration when needed:
 alembic revision --autogenerate -m "describe change"
 ```
 
+## Seed Data
+
+Seed controlled demo land-use data:
+
+```bash
+uv run python scripts/seed_land_use.py
+```
+
 ## Demo Flow
 
 Assuming the app is running on `http://127.0.0.1:8000`.
