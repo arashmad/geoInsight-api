@@ -72,26 +72,6 @@ def test_seed_land_use_is_idempotent(db_session):
     assert len(features) == 5
 
 
-def test_seeded_land_use_features_overlap_test_aoi_bounds(db_session):
-    layer = seed_land_use_data(db_session)
-
-    features = list(
-        db_session.scalars(
-            select(VectorFeature).where(VectorFeature.layer_id == layer.id)
-        ).all()
-    )
-
-    assert len(features) > 0
-
-    overlapping_features = [
-        feature
-        for feature in features
-        if feature.properties["class"] in {"forest", "agriculture", "urban", "water"}
-    ]
-
-    assert len(overlapping_features) >= 1
-
-
 def test_seeded_land_use_features_spatially_overlap_test_aoi(db_session):
     layer = seed_land_use_data(db_session)
 
