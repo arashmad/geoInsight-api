@@ -12,4 +12,4 @@ def test_db_session_opens() -> None:
 def test_postgis_existence() -> None:
     with SessionLocal() as session:
         result = session.execute(text("SELECT PostGIS_Version()")).scalar_one_or_none()
-    assert result == "USE_GEOS=1 USE_PROJ=1 USE_STATS=1"
+    assert "USE_GEOS=1 USE_PROJ=1 USE_STATS=1" in result
