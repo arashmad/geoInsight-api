@@ -1,4 +1,3 @@
-
 from geoinsight_api.db.models.vector_analysis_result import VectorAnalysisResult
 from geoinsight_api.db.models.vector_layer import VectorLayer
 from geoinsight_api.seeds.land_use import seed_land_use_data

@@ -68,7 +68,8 @@ def include_object(object_, name, type_, reflected, compare_to):
         type_ == "table"
         and reflected
         and compare_to is None
-        and name in POSTGIS_INTERNAL_TABLES):
+        and name in POSTGIS_INTERNAL_TABLES
+    ):
         return False
 
 
