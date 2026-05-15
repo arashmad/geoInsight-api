@@ -2,24 +2,35 @@
 
 ## Overview
 
-FastAPI backend for geospatial analysis workflows.
+GeoInsight API is a backend-only FastAPI service for geospatial analysis workflows.
+
+It currently supports project and AOI management, PostGIS-backed vector layer metadata, controlled land-use seed data, and AOI-based land-use composition analysis.
 
 ## Current Scope
 
 This service currently supports:
 
 - Health checks (`/health`, `/health/db`)
-- Project CRUD basics (create and list projects)
-- AOI creation under a project
+- Project CRUD
+- AOI CRUD
+- PostGIS-backed AOI geometry storage
+- Vector layer metadata CRUD
+- Controlled demo land-use seed data
+- Land-use composition analysis by AOI using PostGIS
 
-The API is intentionally minimal while the core geospatial workflow is being validated.
+The API is intentionally backend-only while the core geospatial workflow is being validated.
 
 ## Tech Stack
 
 - Python + FastAPI
 - PostgreSQL/PostGIS
+- SQLAlchemy
+- GeoAlchemy2
 - Alembic for migrations
 - Docker Compose for local orchestration
+- Shapely + PyProj for geometry handling
+- Pytest for tests
+- Ruff for formatting/linting
 
 ## Local Development
 
@@ -31,7 +42,7 @@ The API is intentionally minimal while the core geospatial workflow is being val
 cp .env.example .env
 ```
 
-2. Install dependencies (using `uv`):
+2. Install dependencies using `uv`:
 
 ```bash
 uv sync --dev
@@ -51,17 +62,37 @@ Stop services:
 docker compose down
 ```
 
-Connect directly to the database, running on docker:
+Stop services and remove the local database volume:
+
+```bash
+docker compose down -v
+```
+
+### Connect to the database
+
+If your shell has the `.env` variables loaded:
 
 ```bash
 docker exec -it geoinsight-db psql -U "$DATABASE_USER" -d "$DATABASE_NAME"
-# \dt;
-# \d <tb-name>;
+```
+
+Otherwise, use the values from `.env` directly:
+
+```bash
+docker exec -it geoinsight-db psql -U <database_user> -d <database_name>
+```
+
+Useful psql commands:
+
+```sql
+\dt public.*
+\d <table_name>
+SELECT * FROM alembic_version;
 ```
 
 ## Database Migrations
 
-Check the migration ref:
+Check the current migration revision:
 
 ```bash
 uv run alembic current
@@ -70,13 +101,27 @@ uv run alembic current
 Apply the latest migrations:
 
 ```bash
-alembic upgrade head
+uv run alembic upgrade head
 ```
 
 Create a new migration when needed:
 
 ```bash
-alembic revision --autogenerate -m "describe change"
+uv run alembic revision --autogenerate -m "describe change"
+```
+
+Check whether models and migrations are in sync:
+
+```bash
+uv run alembic check
+```
+
+If the local development database has a broken or stale migration state and local data is disposable, reset it:
+
+```bash
+docker compose down -v
+docker compose up -d db
+uv run alembic upgrade head
 ```
 
 ## Seed Data
@@ -86,6 +131,14 @@ Seed controlled demo land-use data:
 ```bash
 uv run python scripts/seed_land_use.py
 ```
+
+This creates one `land_use` vector layer with demo polygon features for:
+
+- forest
+- agriculture
+- urban
+- water
+- grassland
 
 ## Demo Flow
 
@@ -123,79 +176,115 @@ Replace `<project_id>` with an ID returned by the create/list project calls.
 curl -s -X POST http://127.0.0.1:8000/v1/projects/<project_id>/aois \
   -H "Content-Type: application/json" \
   -d '{
-    "name": "SF Downtown AOI",
-    "description": "Simple polygon AOI",
+    "name": "Demo AOI",
     "geometry": {
       "type": "Polygon",
       "coordinates": [[
-        [-122.423, 37.775],
-        [-122.412, 37.775],
-        [-122.412, 37.784],
-        [-122.423, 37.784],
-        [-122.423, 37.775]
+        [44.50, 40.10],
+        [44.51, 40.10],
+        [44.51, 40.11],
+        [44.50, 40.11],
+        [44.50, 40.10]
       ]]
     }
   }'
 ```
 
-### 5) Optionally list AOIs for a project
-
-If enabled in your local code/version:
+### 5) List AOIs for a project
 
 ```bash
 curl -s http://127.0.0.1:8000/v1/projects/<project_id>/aois
 ```
 
+### 6) Seed demo land-use data
+
+```bash
+uv run python scripts/seed_land_use.py
+```
+
+### 7) List vector layers
+
+```bash
+curl -s http://127.0.0.1:8000/v1/vector-layers
+```
+
+Copy the ID of the seeded `land_use` vector layer.
+
+### 8) Run land-use composition analysis
+
+Replace `<aoi_id>` and `<layer_id>` with real IDs.
+
+```bash
+curl -s -X POST http://127.0.0.1:8000/v1/aois/<aoi_id>/land-use-composition \
+  -H "Content-Type: application/json" \
+  -d '{
+    "layer_id": "<layer_id>"
+  }'
+```
+
 ## API Endpoints
+
+### Health
 
 - `GET /health`
 - `GET /health/db`
+
+### Projects
+
 - `POST /v1/projects`
 - `GET /v1/projects`
 - `GET /v1/projects/{project_id}`
 - `PATCH /v1/projects/{project_id}`
 - `DELETE /v1/projects/{project_id}`
+
+### AOIs
+
 - `POST /v1/projects/{project_id}/aois`
 - `GET /v1/projects/{project_id}/aois`
 - `GET /v1/aois/{aoi_id}`
 - `PATCH /v1/aois/{aoi_id}`
 - `DELETE /v1/aois/{aoi_id}`
+
+### Vector Layers
+
 - `POST /v1/vector-layers`
 - `GET /v1/vector-layers`
 - `GET /v1/vector-layers/{layer_id}`
 - `DELETE /v1/vector-layers/{layer_id}`
 
-## Format
+### Vector Analysis
 
-Run format locally:
+- `POST /v1/aois/{aoi_id}/land-use-composition`
+
+## Formatting
+
+Run formatting locally:
 
 ```bash
-# only /src and /test directory
-make format
-# entire the project
-make format-all
+uv run ruff format .
+uv run ruff check . --fix
 ```
 
 ## Tests
 
-Run tests locally:
+Run all tests locally:
 
 ```bash
-make test
+uv run pytest
 ```
 
-Run focus test:
+Run a focused test file:
 
 ```bash
-uv run pytest tests/test<name>.py
+uv run pytest tests/<test_file_name>.py
 ```
 
-The database tests require the PostGIS container to be running.
+The database tests require the PostGIS container to be running and migrations to be applied.
 
 ## Next Milestone
 
-The next milestone is focused on AOI-centric analysis workflows, including:
+The next milestone is focused on exposing persisted vector analysis results, including:
 
-- AOI retrieval/listing ergonomics
-- Geospatial processing jobs tied to AOIs
-- Better project/AOI lifecycle and status tracking
+- result detail endpoint
+- AOI-level result listing endpoint
+- stronger spatial correctness tests
