@@ -61,16 +61,16 @@ docker exec -it geoinsight-db psql -U "$DATABASE_USER" -d "$DATABASE_NAME"
 
 ## Database Migrations
 
-Apply the latest migrations:
-
-```bash
-alembic upgrade head
-```
-
 Check the migration ref:
 
 ```bash
 uv run alembic current
+```
+
+Apply the latest migrations:
+
+```bash
+alembic upgrade head
 ```
 
 Create a new migration when needed:
