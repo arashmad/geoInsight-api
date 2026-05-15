@@ -63,6 +63,9 @@ POSTGIS_INTERNAL_TABLES = {
 def include_object(object_, name, type_, reflected, compare_to):
     """
     Prevent Alembic from trying to drop PostGIS-owned internal tables.
+
+    reflected=True means the object exists in the database.
+    compare_to=None means the object does not exist in SQLAlchemy metadata.
     """
     if (
         type_ == "table"
@@ -71,6 +74,8 @@ def include_object(object_, name, type_, reflected, compare_to):
         and name in POSTGIS_INTERNAL_TABLES
     ):
         return False
+
+    return True
 
 
 def run_migrations_offline() -> None:
