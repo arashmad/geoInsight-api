@@ -17,7 +17,7 @@ if config.config_file_name is not None:
 
 target_metadata = Base.metadata
 
-# ! Careful with excluding the tables => You might need them in the future
+# Extension-owned tables are managed by PostGIS, not by application migrations.
 POSTGIS_INTERNAL_TABLES = {
     "spatial_ref_sys",
     "topology",
@@ -64,10 +64,12 @@ def include_object(object_, name, type_, reflected, compare_to):
     """
     Prevent Alembic from trying to drop PostGIS-owned internal tables.
     """
-    if type_ == "table" and reflected and name in POSTGIS_INTERNAL_TABLES:
+    if (
+        type_ == "table"
+        and reflected
+        and compare_to is None
+        and name in POSTGIS_INTERNAL_TABLES):
         return False
-
-    return True
 
 
 def run_migrations_offline() -> None:
