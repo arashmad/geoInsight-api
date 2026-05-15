@@ -71,6 +71,7 @@ def test_run_land_use_composition_persists_and_returns_result(client, db_session
     assert "agriculture" in class_names
     assert "urban" in class_names
     assert "water" in class_names
+    assert "grassland" not in class_names
 
     for item in classes:
         assert item["area_m2"] > 0
