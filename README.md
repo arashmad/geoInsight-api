@@ -288,3 +288,17 @@ The next milestone is focused on exposing persisted vector analysis results, inc
 - result detail endpoint
 - AOI-level result listing endpoint
 - stronger spatial correctness tests
+
+## CI
+
+Pull requests and pushes to `main` are checked by GitHub Actions.
+
+The CI workflow runs:
+
+- Alembic migrations
+- Alembic migration consistency check
+- Ruff formatting check
+- Ruff lint check
+- Pytest
+
+CI uses a disposable PostGIS service container and does not require external database secrets.
