@@ -1,0 +1,68 @@
+name: CI
+
+on:
+  pull_request:
+    branches:
+      - main
+  push:
+    branches:
+      - main
+
+jobs:
+  test:
+    name: Test
+    runs-on: ubuntu-latest
+
+    services:
+      postgres:
+        # Use a stable PostGIS image for reproducible CI runs.
+        image: postgis/postgis:16-3.4
+        env:
+          POSTGRES_DB: geoinsight_test
+          POSTGRES_USER: geoinsight
+          POSTGRES_PASSWORD: geoinsight
+        ports:
+          - 5432:5432
+        options: >-
+          --health-cmd "pg_isready -U geoinsight -d geoinsight_test"
+          --health-interval 5s
+          --health-timeout 5s
+          --health-retries 10
+
+    env:
+      DATABASE_HOST: localhost
+      DATABASE_PORT: "5432"
+      DATABASE_NAME: geoinsight_test
+      DATABASE_USER: geoinsight
+      DATABASE_PASSWORD: geoinsight
+      DATABASE_ECHO: "false"
+
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Set up Python
+        uses: actions/setup-python@v5
+        with:
+          python-version: "3.12"
+
+      - name: Install uv
+        uses: astral-sh/setup-uv@v5
+
+      - name: Install dependencies
+        run: uv sync --locked --dev
+
+      - name: Apply database migrations
+        run: uv run alembic upgrade head
+
+      - name: Check database migrations
+        run: uv run alembic check
+
+      - name: Check formatting
+        run: uv run ruff format --check .
+
+      - name: Run lint checks
+        run: uv run ruff check .
+
+      - name: Run tests
+        run: uv run pytest

@@ -1,6 +1,7 @@
 .pytest_cache
 .env
 .venv
+.ruff_cache
 __pycache__
 
 arashmad.md
