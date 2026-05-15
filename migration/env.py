@@ -17,20 +17,52 @@ if config.config_file_name is not None:
 
 target_metadata = Base.metadata
 
-
+# ! Careful with excluding the tables => You might need them in the future
 POSTGIS_INTERNAL_TABLES = {
     "spatial_ref_sys",
     "topology",
     "layer",
+    # PostGIS TIGER/geocoder extension tables
+    "addr",
+    "addrfeat",
+    "bg",
+    "county",
+    "county_lookup",
+    "countysub_lookup",
+    "cousub",
+    "direction_lookup",
+    "edges",
+    "faces",
+    "featnames",
+    "geocode_settings",
+    "geocode_settings_default",
+    "loader_lookuptables",
+    "loader_platform",
+    "loader_variables",
+    "pagc_gaz",
+    "pagc_lex",
+    "pagc_rules",
+    "place",
+    "place_lookup",
+    "secondary_unit_lookup",
+    "state",
+    "state_lookup",
+    "street_type_lookup",
+    "tabblock",
+    "tabblock20",
+    "tract",
+    "zcta5",
+    "zip_lookup",
+    "zip_lookup_all",
+    "zip_lookup_base",
+    "zip_state",
+    "zip_state_loc",
 }
 
 
 def include_object(object_, name, type_, reflected, compare_to):
     """
     Prevent Alembic from trying to drop PostGIS-owned internal tables.
-
-    reflected=True means the object exists in the database.
-    compare_to=None means the object does not exist in SQLAlchemy metadata.
     """
     if type_ == "table" and reflected and name in POSTGIS_INTERNAL_TABLES:
         return False
