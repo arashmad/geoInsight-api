@@ -11,6 +11,7 @@ from geoinsight_api.db.session import get_db
 from geoinsight_api.services.vector_analysis_service import (
     AOIForAnalysisNotFoundError,
     InvalidVectorLayerTypeError,
+    VectorAnalysisResultNotFound,
     VectorAnalysisService,
     VectorLayerForAnalysisNotFoundError,
 )
@@ -22,6 +23,41 @@ def get_vector_analysis_service(
     session: Session = Depends(get_db),
 ) -> VectorAnalysisService:
     return VectorAnalysisService(session=session)
+
+
+@router.get(
+    "/vector-analysis-results/{result_id}",
+    response_model=VectorAnalysisResultRead,
+    status_code=status.HTTP_200_OK,
+)
+def get_vector_analysis_result_by_id(
+    result_id: UUID,
+    service: VectorAnalysisService = Depends(get_vector_analysis_service),
+) -> VectorAnalysisResultRead:
+    try:
+        return service.get_result(result_id=result_id)
+    except VectorAnalysisResultNotFound:
+        raise HTTPException(
+            status_code=status.HTTP_404_NOT_FOUND,
+            detail="Vector analysis results not found",
+        ) from None
+
+
+@router.get(
+    "/aois/{aoi_id}/vector-analysis-results",
+    response_model=list[VectorAnalysisResultRead],
+    status_code=status.HTTP_200_OK,
+)
+def get_vector_analysis_results_by_aoi(
+    aoi_id: UUID, service: VectorAnalysisService = Depends(get_vector_analysis_service)
+) -> list[VectorAnalysisResultRead]:
+    try:
+        return service.get_results_for_aoi(aoi_id=aoi_id)
+    except AOIForAnalysisNotFoundError:
+        raise HTTPException(
+            status_code=status.HTTP_404_NOT_FOUND,
+            detail="AOI not found",
+        ) from None
 
 
 @router.post(

@@ -6,6 +6,7 @@
     "pyproject",
     "pytest",
     "sqlalchemy",
-    "uvicorn"
+    "uvicorn",
+    "aois"
   ]
 }

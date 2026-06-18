@@ -1,5 +1,6 @@
 from tests.data.data_aoi import (
     INVALID_POLYGON,
+    MISSING_AOI_ID,
     MISSING_PROJECT_ID,
     UPDATED_POLYGON,
     VALID_MULTIPOLYGON,
@@ -165,7 +166,7 @@ def test_get_aoi(client):
 
 
 def test_get_missing_aoi_returns_404(client):
-    response = client.get(f"/v1/aois/{MISSING_PROJECT_ID}")
+    response = client.get(f"/v1/aois/{MISSING_AOI_ID}")
 
     assert response.status_code == 404
     assert response.json()["detail"] == "AOI not found"
@@ -210,7 +211,7 @@ def test_update_aoi_geometry_recalculates_derived_fields(client):
 
 def test_update_missing_aoi_returns_404(client):
     response = client.patch(
-        f"/v1/aois/{MISSING_PROJECT_ID}",
+        f"/v1/aois/{MISSING_AOI_ID}",
         json={"name": "Updated Name"},
     )
 
@@ -244,7 +245,7 @@ def test_delete_aoi(client):
 
 
 def test_delete_missing_aoi_returns_404(client):
-    response = client.delete(f"/v1/aois/{MISSING_PROJECT_ID}")
+    response = client.delete(f"/v1/aois/{MISSING_AOI_ID}")
 
     assert response.status_code == 404
     assert response.json()["detail"] == "AOI not found"

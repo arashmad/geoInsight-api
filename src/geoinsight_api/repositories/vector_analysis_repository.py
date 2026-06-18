@@ -14,6 +14,19 @@ class VectorAnalysisRepository:
     def __init__(self, session: Session) -> None:
         self.session = session
 
+    def get_result_by_id(self, result_id: UUID) -> VectorAnalysisResult | None:
+        """Find results by id."""
+        return self.session.get(VectorAnalysisResult, result_id)
+
+    def list_results_by_aoi_id(self, aoi_id: UUID) -> list[VectorAnalysisResult] | None:
+        """Find all results belong to a specific aoi."""
+        stmt = (
+            select(VectorAnalysisResult)
+            .where(VectorAnalysisResult.aoi_id == aoi_id)
+            .order_by(VectorAnalysisResult.created_at)
+        )
+        return list(self.session.scalars(stmt).all())
+
     def calculate_land_use_composition(
         self,
         *,

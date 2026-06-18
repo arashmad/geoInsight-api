@@ -1,7 +1,11 @@
 from geoinsight_api.db.models.vector_analysis_result import VectorAnalysisResult
 from geoinsight_api.db.models.vector_layer import VectorLayer
 from geoinsight_api.seeds.land_use import seed_land_use_data
-from tests.data.data_aoi import MISSING_PROJECT_ID, MISSING_VECTOR_LAYER_ID
+from tests.data.data_aoi import (
+    MISSING_AOI_ID,
+    MISSING_RESULTS_ID,
+    MISSING_VECTOR_LAYER_ID,
+)
 
 
 def create_project(client) -> str:
@@ -87,7 +91,7 @@ def test_run_land_use_composition_for_missing_aoi_returns_404(client, db_session
     db_session.commit()
 
     response = client.post(
-        f"/v1/aois/{MISSING_PROJECT_ID}/land-use-composition",
+        f"/v1/aois/{MISSING_AOI_ID}/land-use-composition",
         json={"layer_id": str(layer.id)},
     )
 
@@ -168,3 +172,97 @@ def test_run_land_use_composition_with_no_overlap_returns_empty_classes(
 
     assert data["metrics"]["classes"] == []
     assert data["metrics"]["total_aoi_area_m2"] > 0
+
+
+def test_get_results_by_id_succeed_200_OK(client, db_session):
+    layer = seed_land_use_data(db_session)
+    db_session.commit()
+
+    project_id = create_project(client)
+    aoi = create_aoi(client, project_id)
+
+    response = client.post(
+        f"/v1/aois/{aoi['id']}/land-use-composition",
+        json={"layer_id": str(layer.id)},
+    )
+
+    data = response.json()
+
+    response = client.get(f"/v1/vector-analysis-results/{data['id']}")
+
+    assert response.status_code == 200
+
+    data = response.json()
+
+    assert data["id"]
+    assert data["aoi_id"] == aoi["id"]
+    assert data["layer_id"] == str(layer.id)
+    assert data["analysis_type"] == "land_use_composition"
+    assert data["metrics"]["total_aoi_area_m2"] > 0
+
+
+def test_get_results_by_aoi_succeed_200_OK(client, db_session):
+    layer = seed_land_use_data(db_session)
+    db_session.commit()
+
+    project_id = create_project(client)
+    aoi = create_aoi(client, project_id)
+
+    response = client.post(
+        f"/v1/aois/{aoi['id']}/land-use-composition",
+        json={"layer_id": str(layer.id)},
+    )
+
+    response = client.post(
+        f"/v1/aois/{aoi['id']}/land-use-composition",
+        json={"layer_id": str(layer.id)},
+    )
+
+    response = client.get(f"/v1/aois/{aoi['id']}/vector-analysis-results")
+
+    assert response.status_code == 200
+
+    data = response.json()
+
+    assert len(data) == 2
+
+    assert data[0]["id"]
+    assert data[1]["id"]
+    assert data[0]["aoi_id"] == aoi["id"]
+    assert data[1]["aoi_id"] == aoi["id"]
+    assert data[0]["layer_id"] == str(layer.id)
+    assert data[1]["layer_id"] == str(layer.id)
+    assert data[0]["analysis_type"] == "land_use_composition"
+    assert data[1]["analysis_type"] == "land_use_composition"
+    assert data[0]["metrics"]["total_aoi_area_m2"] > 0
+    assert data[1]["metrics"]["total_aoi_area_m2"] > 0
+
+
+def test_get_results_by_aoi_succeed_empty_list_200_OK(client, db_session):
+    seed_land_use_data(db_session)
+    db_session.commit()
+
+    project_id = create_project(client)
+    aoi = create_aoi(client, project_id)
+
+    response = client.get(f"/v1/aois/{aoi['id']}/vector-analysis-results")
+
+    assert response.status_code == 200
+
+    data = response.json()
+
+    assert len(data) == 0
+
+
+def test_get_results_by_id_fail_404_NOT_FOUND(client):
+    response = client.get(f"/v1/vector-analysis-results/{MISSING_RESULTS_ID}")
+
+    assert response.status_code == 404
+    assert response.json()["detail"] == "Vector analysis results not found"
+
+
+def test_get_results_by_aoi_fail_404_NOT_FOUND(client):
+    response = client.get(f"/v1/aois/{MISSING_AOI_ID}/vector-analysis-results")
+
+    assert response.status_code == 404
+    assert response.json()["detail"] == "AOI not found"

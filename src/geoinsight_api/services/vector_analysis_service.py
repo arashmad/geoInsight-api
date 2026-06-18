@@ -17,6 +17,10 @@ class AOIForAnalysisNotFoundError(Exception):
     pass
 
 
+class VectorAnalysisResultNotFound(Exception):
+    pass
+
+
 class VectorLayerForAnalysisNotFoundError(Exception):
     pass
 
@@ -29,6 +33,22 @@ class VectorAnalysisService:
     def __init__(self, session: Session) -> None:
         self.session = session
         self.repository = VectorAnalysisRepository(session=session)
+
+    def get_result(self, result_id: UUID) -> VectorAnalysisResult:
+        result = self.repository.get_result_by_id(result_id)
+
+        if result is None:
+            raise VectorAnalysisResultNotFound
+
+        return result
+
+    def get_results_for_aoi(self, aoi_id: UUID) -> list[VectorAnalysisResult]:
+        aoi = self.session.get(AOI, aoi_id)
+
+        if aoi is None:
+            raise AOIForAnalysisNotFoundError
+
+        return self.repository.list_results_by_aoi_id(aoi_id)
 
     def run_land_use_composition(
         self,
