@@ -74,6 +74,10 @@ def test_run_land_use_composition_persists_and_returns_result(client, db_session
     assert data["layer_id"] == str(layer.id)
     assert data["analysis_type"] == "land_use_composition"
 
+    # ! A cleaner structure would keep that test focused
+    # ! on persistence and add a separate. ->
+    # ! test_run_land_use_composition_persists_and_returns_result
+
     metrics = data["metrics"]
 
     classes = metrics["classes"]
