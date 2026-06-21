@@ -73,9 +73,10 @@ def test_run_land_use_composition_persists_and_returns_result(client, db_session
     assert data["aoi_id"] == aoi["id"]
     assert data["layer_id"] == str(layer.id)
     assert data["analysis_type"] == "land_use_composition"
-    assert data["metrics"]["total_aoi_area_m2"] > 0
 
-    classes = data["metrics"]["classes"]
+    metrics = data["metrics"]
+
+    classes = metrics["classes"]
     class_names = {item["class"] for item in classes}
 
     assert "forest" in class_names
@@ -84,9 +85,21 @@ def test_run_land_use_composition_persists_and_returns_result(client, db_session
     assert "water" in class_names
     assert "grassland" in class_names
 
-    for item in classes:
-        assert item["area_m2"] > 0
-        assert item["percentage"] > 0
+    class_area_percentage = {
+        c["class"]: {"area_m2": c["area_m2"], "percentage": c["percentage"]}
+        for c in classes
+    }
+
+    assert abs(class_area_percentage["forest"]["area_m2"] - 385439.272) < 0.1
+    assert abs(class_area_percentage["agriculture"]["area_m2"] - 216926.075) < 0.1
+    assert abs(class_area_percentage["urban"]["area_m2"] - 236674.159) < 0.1
+    assert abs(class_area_percentage["water"]["area_m2"] - 54935.781) < 0.1
+    assert abs(class_area_percentage["grassland"]["area_m2"] - 221040.261) < 0.1
+
+    assert (
+        abs(sum([cl["percentage"] for cl in class_area_percentage.values()]) - 100.0)
+        < 10
+    )
 
     saved_result = db_session.get(VectorAnalysisResult, data["id"])
 
