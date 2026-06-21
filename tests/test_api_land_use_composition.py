@@ -24,11 +24,19 @@ def create_aoi(client, project_id: str, geometry: dict | None = None) -> dict:
             "type": "Polygon",
             "coordinates": [
                 [
-                    [44.50, 40.10],
-                    [44.51, 40.10],
+                    [44.4978746, 40.1040156],
+                    [44.5012888, 40.1021535],
+                    [44.503142, 40.0990132],
+                    [44.5083053, 40.0992344],
+                    [44.5091366, 40.1018914],
+                    [44.5143689, 40.1004173],
+                    [44.5124816, 40.104061],
+                    [44.5133323, 40.1070111],
                     [44.51, 40.11],
-                    [44.50, 40.11],
-                    [44.50, 40.10],
+                    [44.5051666, 40.1113229],
+                    [44.5010205, 40.1079586],
+                    [44.4979615, 40.1077266],
+                    [44.4978746, 40.1040156],
                 ]
             ],
         }
@@ -65,20 +73,41 @@ def test_run_land_use_composition_persists_and_returns_result(client, db_session
     assert data["aoi_id"] == aoi["id"]
     assert data["layer_id"] == str(layer.id)
     assert data["analysis_type"] == "land_use_composition"
-    assert data["metrics"]["total_aoi_area_m2"] > 0
 
-    classes = data["metrics"]["classes"]
+    # ! A cleaner structure would keep that test focused
+    # ! on persistence and add a separate. ->
+    # ! test_run_land_use_composition_persists_and_returns_result
+
+    metrics = data["metrics"]
+
+    classes = metrics["classes"]
     class_names = {item["class"] for item in classes}
 
-    assert "forest" in class_names
-    assert "agriculture" in class_names
-    assert "urban" in class_names
-    assert "water" in class_names
-    assert "grassland" not in class_names
+    assert class_names == {"forest", "agriculture", "urban", "water", "grassland"}
 
-    for item in classes:
-        assert item["area_m2"] > 0
-        assert item["percentage"] > 0
+    metrics_formatted = {
+        c["class"]: {"area_m2": c["area_m2"], "percentage": c["percentage"]}
+        for c in classes
+    }
+
+    expected_metrics = {
+        "forest": {"area_m2": 385439.272, "percentage": 31.2533},
+        "agriculture": {"area_m2": 216926.075, "percentage": 17.5894},
+        "urban": {"area_m2": 236674.159, "percentage": 19.1907},
+        "water": {"area_m2": 54935.781, "percentage": 4.4545},
+        "grassland": {"area_m2": 221040.261, "percentage": 17.923},
+    }
+
+    for cl in expected_metrics:
+        cl_metrics = metrics_formatted[cl]
+        exp_metrics = expected_metrics[cl]
+        assert abs(cl_metrics["area_m2"] - exp_metrics["area_m2"]) < 1.0
+        assert abs(cl_metrics["percentage"] - exp_metrics["percentage"]) < 0.01
+
+    total_percentage = sum(item["percentage"] for item in metrics_formatted.values())
+    assert abs(total_percentage - 90.4109) < 0.01
+
+    assert abs(metrics["total_aoi_area_m2"] - 1233274.939100258) < 1.0
 
     saved_result = db_session.get(VectorAnalysisResult, data["id"])
 
