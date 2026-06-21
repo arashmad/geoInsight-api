@@ -97,8 +97,11 @@ def test_run_land_use_composition_persists_and_returns_result(client, db_session
     for cl in expected_metrics:
         cl_metrics = metrics_formatted[cl]
         exp_metrics = expected_metrics[cl]
-        abs(cl_metrics["area_m2"] - exp_metrics["area_m2"]) < 1.0
-        abs(cl_metrics["percentage"] - exp_metrics["percentage"]) < 1.0
+        assert abs(cl_metrics["area_m2"] - exp_metrics["area_m2"]) < 1.0
+        assert abs(cl_metrics["percentage"] - exp_metrics["percentage"]) < 0.01
+
+    total_percentage = sum(item["percentage"] for item in metrics_formatted.values())
+    assert abs(total_percentage - 90.4109) < 0.01
 
     assert abs(metrics["total_aoi_area_m2"] - 1233274.939100258) < 1.0
 
