@@ -45,7 +45,7 @@ LAND_USE_FEATURES = [
     },
     {
         "class": "water",
-        "geometry": _multipolygon_from_bounds(44.502, 40.102, 44.508, 40.108),
+        "geometry": _multipolygon_from_bounds(44.497, 40.105, 44.500, 40.110),
     },
     {
         "class": "grassland",

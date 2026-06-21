@@ -24,11 +24,19 @@ def create_aoi(client, project_id: str, geometry: dict | None = None) -> dict:
             "type": "Polygon",
             "coordinates": [
                 [
-                    [44.50, 40.10],
-                    [44.51, 40.10],
+                    [44.4978746, 40.1040156],
+                    [44.5012888, 40.1021535],
+                    [44.503142, 40.0990132],
+                    [44.5083053, 40.0992344],
+                    [44.5091366, 40.1018914],
+                    [44.5143689, 40.1004173],
+                    [44.5124816, 40.104061],
+                    [44.5133323, 40.1070111],
                     [44.51, 40.11],
-                    [44.50, 40.11],
-                    [44.50, 40.10],
+                    [44.5051666, 40.1113229],
+                    [44.5010205, 40.1079586],
+                    [44.4979615, 40.1077266],
+                    [44.4978746, 40.1040156],
                 ]
             ],
         }
@@ -74,7 +82,7 @@ def test_run_land_use_composition_persists_and_returns_result(client, db_session
     assert "agriculture" in class_names
     assert "urban" in class_names
     assert "water" in class_names
-    assert "grassland" not in class_names
+    assert "grassland" in class_names
 
     for item in classes:
         assert item["area_m2"] > 0
