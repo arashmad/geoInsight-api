@@ -48,50 +48,59 @@ def test_seed_land_use_creates_layer_and_features(db_session):
 def test_seed_land_use_script_persists_data_across_sessions(db_session):
     main()
 
-    new_session = SessionLocal()
+    try:
+        new_session = SessionLocal()
 
-    stored_layer = new_session.scalar(
-        select(VectorLayer).where(
-            VectorLayer.name == LAND_USE_LAYER_NAME,
-            VectorLayer.layer_type == LAND_USE_LAYER_TYPE,
-            VectorLayer.source == LAND_USE_SOURCE,
-        )
-    )
-
-    assert stored_layer is not None
-
-    features = new_session.scalars(
-        select(VectorFeature).where(VectorFeature.layer_id == stored_layer.id)
-    ).all()
-
-    assert len(features) == 5
-
-
-def test_seed_land_use_is_idempotent(db_session):
-    first_layer = seed_land_use_data(db_session)
-    second_layer = seed_land_use_data(db_session)
-
-    assert first_layer.id == second_layer.id
-
-    layers = list(
-        db_session.scalars(
+        stored_layer = new_session.scalar(
             select(VectorLayer).where(
                 VectorLayer.name == LAND_USE_LAYER_NAME,
                 VectorLayer.layer_type == LAND_USE_LAYER_TYPE,
                 VectorLayer.source == LAND_USE_SOURCE,
             )
+        )
+
+        assert stored_layer is not None
+
+        features = new_session.scalars(
+            select(VectorFeature).where(VectorFeature.layer_id == stored_layer.id)
         ).all()
-    )
 
-    assert len(layers) == 1
+        assert len(features) == 5
+    finally:
+        new_session.close()
 
-    features = list(
-        db_session.scalars(
-            select(VectorFeature).where(VectorFeature.layer_id == second_layer.id)
-        ).all()
-    )
 
-    assert len(features) == 5
+def test_seed_land_use_is_idempotent(db_session):
+    main()
+    main()
+
+    try:
+        new_session = SessionLocal()
+
+        layer_list = list(
+            new_session.scalars(
+                select(VectorLayer).where(
+                    VectorLayer.name == LAND_USE_LAYER_NAME,
+                    VectorLayer.layer_type == LAND_USE_LAYER_TYPE,
+                    VectorLayer.source == LAND_USE_SOURCE,
+                )
+            ).all()
+        )
+
+        assert len(layer_list) == 1
+
+        layer_id = layer_list[0].id
+
+        features = list(
+            db_session.scalars(
+                select(VectorFeature).where(VectorFeature.layer_id == layer_id)
+            ).all()
+        )
+
+        assert len(features) == 5
+
+    finally:
+        new_session.close()
 
 
 def test_seeded_land_use_features_spatially_overlap_test_aoi(db_session):
