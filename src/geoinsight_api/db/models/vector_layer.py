@@ -10,14 +10,14 @@ from geoinsight_api.db.base import Base
 class VectorLayer(Base):
     __tablename__ = "vector_layers"
 
-    __table_args__ = (
-        UniqueConstraint(
-            "name",
-            "layer_type",
-            "source",
-            name="uq_vector_layers_name_type_source",
-        ),
-    )
+    # __table_args__ = (
+    #     UniqueConstraint(
+    #         "name",
+    #         "layer_type",
+    #         "source",
+    #         name="uq_vector_layers_name_type_source",
+    #     ),
+    # )
 
     id: Mapped[uuid.UUID] = mapped_column(
         UUID(as_uuid=True),
