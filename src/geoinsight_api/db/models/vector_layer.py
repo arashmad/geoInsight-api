@@ -1,6 +1,6 @@
 import uuid
 
-from sqlalchemy import DateTime, Integer, String, Text, func
+from sqlalchemy import DateTime, Integer, String, Text, UniqueConstraint, func
 from sqlalchemy.dialects.postgresql import JSONB, UUID
 from sqlalchemy.orm import Mapped, mapped_column, relationship
 
@@ -9,6 +9,10 @@ from geoinsight_api.db.base import Base
 
 class VectorLayer(Base):
     __tablename__ = "vector_layers"
+
+    __table_args__ = UniqueConstraint(
+        "name", "layer_type", "source", name="uq_vector_layer_name_type_source"
+    )
 
     id: Mapped[uuid.UUID] = mapped_column(
         UUID(as_uuid=True),
