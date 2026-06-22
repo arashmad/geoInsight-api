@@ -7,7 +7,11 @@ def main() -> None:
 
     try:
         layer = seed_land_use_data(session)
+        session.commit()
         print(f"Seeded land-use layer: {layer.id}")
+    except:
+        session.rollback()
+        raise
     finally:
         session.close()
 
