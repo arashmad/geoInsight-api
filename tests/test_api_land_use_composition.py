@@ -74,10 +74,6 @@ def test_run_land_use_composition_persists_and_returns_result(client, db_session
     assert data["layer_id"] == str(layer.id)
     assert data["analysis_type"] == "land_use_composition"
 
-    # ! A cleaner structure would keep that test focused
-    # ! on persistence and add a separate. ->
-    # ! test_run_land_use_composition_persists_and_returns_result
-
     metrics = data["metrics"]
 
     classes = metrics["classes"]
@@ -108,6 +104,9 @@ def test_run_land_use_composition_persists_and_returns_result(client, db_session
     assert abs(total_percentage - 90.4109) < 0.01
 
     assert abs(metrics["total_aoi_area_m2"] - 1233274.939100258) < 1.0
+
+    assert metrics["covered_area_m2"] == 1115015.1687
+    assert metrics["covered_area_percentage"] == 71.3792
 
     saved_result = db_session.get(VectorAnalysisResult, data["id"])
 
