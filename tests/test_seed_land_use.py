@@ -6,12 +6,14 @@ from geoinsight_api.db.models.aoi import AOI
 from geoinsight_api.db.models.project import Project
 from geoinsight_api.db.models.vector_feature import VectorFeature
 from geoinsight_api.db.models.vector_layer import VectorLayer
+from geoinsight_api.db.session import SessionLocal
 from geoinsight_api.seeds.land_use import (
     LAND_USE_LAYER_NAME,
     LAND_USE_LAYER_TYPE,
     LAND_USE_SOURCE,
     seed_land_use_data,
 )
+from scripts.seed_land_use import main
 
 
 def test_seed_land_use_creates_layer_and_features(db_session):
@@ -26,11 +28,9 @@ def test_seed_land_use_creates_layer_and_features(db_session):
     assert saved_layer.srid == 4326
     assert saved_layer.properties_schema == {"class": "string"}
 
-    features = list(
-        db_session.scalars(
-            select(VectorFeature).where(VectorFeature.layer_id == saved_layer.id)
-        ).all()
-    )
+    features = db_session.scalars(
+        select(VectorFeature).where(VectorFeature.layer_id == saved_layer.id)
+    ).all()
 
     assert len(features) == 5
 
@@ -43,6 +43,28 @@ def test_seed_land_use_creates_layer_and_features(db_session):
         "water",
         "grassland",
     }
+
+
+def test_seed_land_use_script_persists_data_across_sessions(db_session):
+    main()
+
+    new_session = SessionLocal()
+
+    stored_layer = new_session.scalar(
+        select(VectorLayer).where(
+            VectorLayer.name == LAND_USE_LAYER_NAME,
+            VectorLayer.layer_type == LAND_USE_LAYER_TYPE,
+            VectorLayer.source == LAND_USE_SOURCE,
+        )
+    )
+
+    assert stored_layer is not None
+
+    features = new_session.scalars(
+        select(VectorFeature).where(VectorFeature.layer_id == stored_layer.id)
+    ).all()
+
+    assert len(features) == 5
 
 
 def test_seed_land_use_is_idempotent(db_session):
