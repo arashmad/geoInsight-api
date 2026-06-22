@@ -74,6 +74,11 @@ class VectorAnalysisService:
             layer_id=layer_id,
         )
 
+        covered_area_m2, covered_area_percentage = self.repository.calculate_coverage(
+            aoi=aoi,
+            layer_id=layer_id,
+        )
+
         total_aoi_area_m2 = float(aoi.area_m2 or 0)
 
         classes = [
@@ -91,6 +96,8 @@ class VectorAnalysisService:
         metrics: dict[str, Any] = {
             "total_aoi_area_m2": total_aoi_area_m2,
             "classes": classes,
+            "covered_area_m2": covered_area_m2,
+            "covered_area_percentage": covered_area_percentage,
         }
 
         result = self.repository.create_result(

@@ -80,6 +80,39 @@ class VectorAnalysisRepository:
 
         return results
 
+    def calculate_coverage(self, *, aoi: AOI, layer_id: UUID) -> tuple[float, float]:
+        """Return area covered by AIO in square-meter and percentage."""
+        stmt_union_features = func.ST_Union(VectorFeature.geometry)
+        stmt = (
+            select(
+                func.ST_Area(
+                    cast(
+                        func.ST_Intersection(aoi.geometry, stmt_union_features),
+                        Geography,
+                    )
+                ).label("coverage_area_m2"),
+                (
+                    func.ST_Area(
+                        cast(
+                            func.ST_Intersection(aoi.geometry, stmt_union_features),
+                            Geography,
+                        )
+                    )
+                    / func.ST_Area(cast(stmt_union_features, Geography))
+                    * 100
+                ).label("coverage_area_percentage"),
+            )
+            .select_from(VectorFeature)
+            .where(VectorFeature.layer_id == layer_id)
+        )
+
+        row = self.session.execute(stmt).first()
+
+        if not row or row.coverage_area_m2 is None:
+            return (0.0, 0.0)
+
+        return (round(row.coverage_area_m2, 4), round(row.coverage_area_percentage, 4))
+
     def create_result(
         self,
         *,
