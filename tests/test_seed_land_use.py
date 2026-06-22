@@ -92,7 +92,7 @@ def test_seed_land_use_is_idempotent(db_session):
         layer_id = layer_list[0].id
 
         features = list(
-            db_session.scalars(
+            new_session.scalars(
                 select(VectorFeature).where(VectorFeature.layer_id == layer_id)
             ).all()
         )
