@@ -80,12 +80,9 @@ class VectorAnalysisRepository:
 
         return results
 
-    def calculate_coverage_area_m2(
-        self, *, aoi: AOI, layer_id: UUID
-    ) -> tuple[float, float]:
+    def calculate_coverage_area_m2(self, *, aoi: AOI, layer_id: UUID) -> float:
         """
-        Return covered area and total area of land use features
-        within AOI in square-meter respectively.
+        Return covered area of land use features by within AOI in square-meter.
         """
         # ! Performance Issue
         # ! If your layer contains thousands of complex features,
@@ -100,19 +97,15 @@ class VectorAnalysisRepository:
                 Geography,
             )
         )
-        stmt_total_area_m2 = func.ST_Area(cast(stmt_union_land_use, Geography))
         stmt = (
-            select(
-                func.coalesce(stmt_covered_area_m2, 0.0).label("covered_area_m2"),
-                func.coalesce(stmt_total_area_m2, 0.0).label("total_area_m2"),
-            )
+            select(func.coalesce(stmt_covered_area_m2, 0.0).label("covered_area_m2"))
             .select_from(VectorFeature)
             .where(VectorFeature.layer_id == layer_id)
         )
 
         row = self.session.execute(stmt).first()
 
-        return row.covered_area_m2, row.total_area_m2
+        return row.covered_area_m2
 
     def create_result(
         self,
