@@ -101,11 +101,12 @@ class VectorAnalysisRepository:
             select(func.coalesce(stmt_covered_area_m2, 0.0).label("covered_area_m2"))
             .select_from(VectorFeature)
             .where(VectorFeature.layer_id == layer_id)
+            .where(func.ST_Intersects(VectorFeature.geometry, aoi.geometry))
         )
 
         row = self.session.execute(stmt).first()
 
-        return row.covered_area_m2
+        return float(row.covered_area_m2 or 0)
 
     def create_result(
         self,
