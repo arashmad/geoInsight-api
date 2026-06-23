@@ -74,7 +74,7 @@ class VectorAnalysisService:
             layer_id=layer_id,
         )
 
-        covered_area_m2, covered_area_percentage = self.repository.calculate_coverage(
+        covered_area_m2, total_area_m2 = self.repository.calculate_coverage_area_m2(
             aoi=aoi,
             layer_id=layer_id,
         )
@@ -97,7 +97,9 @@ class VectorAnalysisService:
             "total_aoi_area_m2": total_aoi_area_m2,
             "classes": classes,
             "covered_area_m2": covered_area_m2,
-            "covered_area_percentage": covered_area_percentage,
+            "covered_area_percentage": self._calculate_percentage(
+                part_area_m2=covered_area_m2, total_area_m2=total_aoi_area_m2
+            ),
         }
 
         result = self.repository.create_result(

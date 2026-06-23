@@ -80,27 +80,25 @@ class VectorAnalysisRepository:
 
         return results
 
-    def calculate_coverage(self, *, aoi: AOI, layer_id: UUID) -> tuple[float, float]:
-        """Return area covered by AIO in square-meter and percentage."""
-        stmt_union_features = func.ST_Union(VectorFeature.geometry)
+    def calculate_coverage_area_m2(
+        self, *, aoi: AOI, layer_id: UUID
+    ) -> tuple[float, float]:
+        """
+        Return covered area and total area of land use features
+        within AOI in square-meter respectively.
+        """
+        stmt_union_land_use = func.ST_Union(VectorFeature.geometry)
+        stmt_covered_area_m2 = func.ST_Area(
+            cast(
+                func.ST_Intersection(aoi.geometry, stmt_union_land_use),
+                Geography,
+            )
+        )
+        stmt_total_area_m2 = func.ST_Area(cast(stmt_union_land_use, Geography))
         stmt = (
             select(
-                func.ST_Area(
-                    cast(
-                        func.ST_Intersection(aoi.geometry, stmt_union_features),
-                        Geography,
-                    )
-                ).label("coverage_area_m2"),
-                (
-                    func.ST_Area(
-                        cast(
-                            func.ST_Intersection(aoi.geometry, stmt_union_features),
-                            Geography,
-                        )
-                    )
-                    / func.ST_Area(cast(stmt_union_features, Geography))
-                    * 100
-                ).label("coverage_area_percentage"),
+                stmt_covered_area_m2.label("covered_area_m2"),
+                stmt_total_area_m2.label("total_area_m2"),
             )
             .select_from(VectorFeature)
             .where(VectorFeature.layer_id == layer_id)
@@ -108,10 +106,17 @@ class VectorAnalysisRepository:
 
         row = self.session.execute(stmt).first()
 
-        if not row or row.coverage_area_m2 is None:
-            return (0.0, 0.0)
+        covered_area_m2 = (
+            0.0
+            if not row or row.covered_area_m2 is None
+            else round(row.covered_area_m2, 4)
+        )
 
-        return (round(row.coverage_area_m2, 4), round(row.coverage_area_percentage, 4))
+        total_area_m2 = (
+            0.0 if not row or row.total_area_m2 is None else round(row.total_area_m2, 4)
+        )
+
+        return covered_area_m2, total_area_m2
 
     def create_result(
         self,
