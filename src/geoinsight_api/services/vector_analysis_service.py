@@ -96,9 +96,9 @@ class VectorAnalysisService:
         metrics: dict[str, Any] = {
             "total_aoi_area_m2": total_aoi_area_m2,
             "classes": classes,
-            "covered_area_m2": covered_area_m2,
+            "covered_area_m2": round(covered_area_m2, 4),
             "covered_area_percentage": self._calculate_percentage(
-                part_area_m2=covered_area_m2, total_area_m2=total_aoi_area_m2
+                part_area_m2=covered_area_m2, total_area_m2=total_area_m2
             ),
         }
 

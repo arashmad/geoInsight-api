@@ -87,6 +87,12 @@ class VectorAnalysisRepository:
         Return covered area and total area of land use features
         within AOI in square-meter respectively.
         """
+        # ! Performance Issue
+        # ! If your layer contains thousands of complex features,
+        # ! PostgreSQL might accidentally execute that expensive
+        # ! ST_Union calculation twice (once for each column layout slot).
+        # TODO: For large dataset, better to use subquery()
+
         stmt_union_land_use = func.ST_Union(VectorFeature.geometry)
         stmt_covered_area_m2 = func.ST_Area(
             cast(
@@ -97,8 +103,8 @@ class VectorAnalysisRepository:
         stmt_total_area_m2 = func.ST_Area(cast(stmt_union_land_use, Geography))
         stmt = (
             select(
-                stmt_covered_area_m2.label("covered_area_m2"),
-                stmt_total_area_m2.label("total_area_m2"),
+                func.coalesce(stmt_covered_area_m2, 0.0).label("covered_area_m2"),
+                func.coalesce(stmt_total_area_m2, 0.0).label("total_area_m2"),
             )
             .select_from(VectorFeature)
             .where(VectorFeature.layer_id == layer_id)
@@ -106,17 +112,7 @@ class VectorAnalysisRepository:
 
         row = self.session.execute(stmt).first()
 
-        covered_area_m2 = (
-            0.0
-            if not row or row.covered_area_m2 is None
-            else round(row.covered_area_m2, 4)
-        )
-
-        total_area_m2 = (
-            0.0 if not row or row.total_area_m2 is None else round(row.total_area_m2, 4)
-        )
-
-        return covered_area_m2, total_area_m2
+        return row.covered_area_m2, row.total_area_m2
 
     def create_result(
         self,
