@@ -80,6 +80,34 @@ class VectorAnalysisRepository:
 
         return results
 
+    def calculate_coverage_area_m2(self, *, aoi: AOI, layer_id: UUID) -> float:
+        """
+        Return covered area of land use features by within AOI in square-meter.
+        """
+        # ! Performance Issue
+        # ! If your layer contains thousands of complex features,
+        # ! PostgreSQL might accidentally execute that expensive
+        # ! ST_Union calculation twice (once for each column layout slot).
+        # TODO: For large dataset, better to use subquery()
+
+        stmt_union_land_use = func.ST_Union(VectorFeature.geometry)
+        stmt_covered_area_m2 = func.ST_Area(
+            cast(
+                func.ST_Intersection(aoi.geometry, stmt_union_land_use),
+                Geography,
+            )
+        )
+        stmt = (
+            select(func.coalesce(stmt_covered_area_m2, 0.0).label("covered_area_m2"))
+            .select_from(VectorFeature)
+            .where(VectorFeature.layer_id == layer_id)
+            .where(func.ST_Intersects(VectorFeature.geometry, aoi.geometry))
+        )
+
+        row = self.session.execute(stmt).first()
+
+        return float(row.covered_area_m2 or 0)
+
     def create_result(
         self,
         *,

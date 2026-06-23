@@ -76,6 +76,22 @@ class VectorAnalysisService:
 
         total_aoi_area_m2 = float(aoi.area_m2 or 0)
 
+        covered_area_m2 = self.repository.calculate_coverage_area_m2(
+            aoi=aoi,
+            layer_id=layer_id,
+        )
+
+        coverage_percentage = min(
+            100.0,
+            max(
+                0.0,
+                self._calculate_percentage(
+                    part_area_m2=covered_area_m2,
+                    total_area_m2=total_aoi_area_m2,
+                ),
+            ),
+        )
+
         classes = [
             {
                 "class": row["class"],
@@ -90,6 +106,8 @@ class VectorAnalysisService:
 
         metrics: dict[str, Any] = {
             "total_aoi_area_m2": total_aoi_area_m2,
+            "covered_area_m2": round(covered_area_m2, 4),
+            "coverage_percentage": coverage_percentage,
             "classes": classes,
         }
 
