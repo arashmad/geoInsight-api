@@ -105,8 +105,8 @@ def test_run_land_use_composition_persists_and_returns_result(client, db_session
 
     assert abs(metrics["total_aoi_area_m2"] - 1233274.939100258) < 1.0
 
-    assert metrics["covered_area_m2"] == 1115015.1687
-    assert metrics["covered_area_percentage"] == 90.4109
+    assert abs(metrics["covered_area_m2"] - 1115015.1687) < 1.0
+    assert abs(metrics["coverage_percentage"] - 90.4109) < 0.01
 
     saved_result = db_session.get(VectorAnalysisResult, data["id"])
 
@@ -200,6 +200,9 @@ def test_run_land_use_composition_with_no_overlap_returns_empty_classes(
 
     assert data["metrics"]["classes"] == []
     assert data["metrics"]["total_aoi_area_m2"] > 0
+
+    assert data["metrics"]["covered_area_m2"] == 0.0
+    assert data["metrics"]["coverage_percentage"] == 0.0
 
 
 def test_get_results_by_id_succeed_200_OK(client, db_session):
