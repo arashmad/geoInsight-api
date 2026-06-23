@@ -53,7 +53,9 @@ def create_aoi(client, project_id: str, geometry: dict | None = None) -> dict:
     return response.json()
 
 
-def test_run_land_use_composition_persists_and_returns_result(client, db_session):
+def test_run_land_use_composition_persists_and_returns_result_partial_coverage(
+    client, db_session
+):
     layer = seed_land_use_data(db_session)
     db_session.commit()
 
@@ -112,6 +114,144 @@ def test_run_land_use_composition_persists_and_returns_result(client, db_session
 
     assert saved_result is not None
     assert saved_result.analysis_type == "land_use_composition"
+
+
+def test_run_land_use_composition_exactly_overlapped(client, db_session):
+    layer = seed_land_use_data(db_session)
+    db_session.commit()
+
+    project_id = create_project(client)
+
+    aoi = {
+        "type": "Polygon",
+        "coordinates": [
+            [
+                [44.51, 40.1],
+                [44.505, 40.1],
+                [44.5, 40.1],
+                [44.5, 40.105],
+                [44.497, 40.105],
+                [44.497, 40.11],
+                [44.5, 40.11],
+                [44.505, 40.11],
+                [44.51, 40.11],
+                [44.515, 40.11],
+                [44.515, 40.1],
+                [44.51, 40.1],
+            ]
+        ],
+    }
+
+    aoi = create_aoi(client, project_id, geometry=aoi)
+
+    response = client.post(
+        f"/v1/aois/{aoi['id']}/land-use-composition",
+        json={"layer_id": str(layer.id)},
+    )
+
+    assert response.status_code == 201
+
+    data = response.json()
+
+    metrics = data["metrics"]
+
+    classes = metrics["classes"]
+    class_names = {item["class"] for item in classes}
+
+    assert class_names == {"forest", "agriculture", "urban", "water", "grassland"}
+
+    metrics_formatted = {
+        c["class"]: {"area_m2": c["area_m2"], "percentage": c["percentage"]}
+        for c in classes
+    }
+
+    expected_metrics = {
+        "forest": {"area_m2": 473365.4406, "percentage": 30.3031},
+        "agriculture": {"area_m2": 236691.2815, "percentage": 15.1521},
+        "urban": {"area_m2": 236674.1590, "percentage": 15.151},
+        "water": {"area_m2": 142004.4954, "percentage": 9.0906},
+        "grassland": {"area_m2": 473365.4406, "percentage": 30.3031},
+    }
+
+    for cl in expected_metrics:
+        cl_metrics = metrics_formatted[cl]
+        exp_metrics = expected_metrics[cl]
+        assert abs(cl_metrics["area_m2"] - exp_metrics["area_m2"]) < 1.0
+        assert abs(cl_metrics["percentage"] - exp_metrics["percentage"]) < 0.01
+
+    total_percentage = sum(item["percentage"] for item in metrics_formatted.values())
+    assert abs(total_percentage - 100) < 0.01
+
+    assert abs(metrics["total_aoi_area_m2"] - 1562100.8175) < 1.0
+
+    assert abs(metrics["covered_area_m2"] - 1562100.8175) < 1.0
+    assert metrics["coverage_percentage"] == 100.0
+
+
+def test_run_land_use_composition_exactly_overlapped_beyond(client, db_session):
+    layer = seed_land_use_data(db_session)
+    db_session.commit()
+
+    project_id = create_project(client)
+
+    aoi = {
+        "type": "Polygon",
+        "coordinates": [
+            [
+                [44.496407, 40.1103029],
+                [44.5155058, 40.1102362],
+                [44.5153314, 40.0994969],
+                [44.4994157, 40.0996637],
+                [44.4964506, 40.1047],
+                [44.496407, 40.1103029],
+            ]
+        ],
+    }
+
+    aoi = create_aoi(client, project_id, geometry=aoi)
+
+    response = client.post(
+        f"/v1/aois/{aoi['id']}/land-use-composition",
+        json={"layer_id": str(layer.id)},
+    )
+
+    assert response.status_code == 201
+
+    data = response.json()
+
+    metrics = data["metrics"]
+
+    classes = metrics["classes"]
+    class_names = {item["class"] for item in classes}
+
+    assert class_names == {"forest", "agriculture", "urban", "water", "grassland"}
+
+    metrics_formatted = {
+        c["class"]: {"area_m2": c["area_m2"], "percentage": c["percentage"]}
+        for c in classes
+    }
+
+    expected_metrics = {
+        "forest": {"area_m2": 473365.4406, "percentage": 25.6184},
+        "agriculture": {"area_m2": 236691.2815, "percentage": 12.8097},
+        "urban": {"area_m2": 236674.1590, "percentage": 12.8087},
+        "water": {"area_m2": 142004.4954, "percentage": 7.6852},
+        "grassland": {"area_m2": 473365.4406, "percentage": 25.6184},
+    }
+
+    for cl in expected_metrics:
+        cl_metrics = metrics_formatted[cl]
+        exp_metrics = expected_metrics[cl]
+        assert abs(cl_metrics["area_m2"] - exp_metrics["area_m2"]) < 1.0
+        assert abs(cl_metrics["percentage"] - exp_metrics["percentage"]) < 0.01
+
+    total_percentage = sum(item["percentage"] for item in metrics_formatted.values())
+    assert abs(total_percentage - 84.5404) < 0.01
+
+    assert abs(metrics["total_aoi_area_m2"] - 1847756.7986493409) < 1.0
+
+    assert abs(metrics["covered_area_m2"] - 1562100.8175) < 1.0
+    assert metrics["coverage_percentage"] == 84.5404
 
 
 def test_run_land_use_composition_for_missing_aoi_returns_404(client, db_session):
